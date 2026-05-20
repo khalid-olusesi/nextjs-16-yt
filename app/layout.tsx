@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
+import { ConvexProvider } from "@/components/web/ConvexProvider";
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,9 +29,26 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <main className="max-w-7xl mx-auto w-full px-4 md:px-6 lg:px-8">
+            <Suspense fallback={null}>
+              <ConvexProvider>{children}</ConvexProvider>
+            </Suspense>
+          </main>{" "}
+          <Toaster closeButton />
+        </ThemeProvider>{" "}
+        {/* we wrapped everything in a theme provider to style the theme and add a toggle for light and dark mode, it is also important to import it from your component rather than next themes*/}
+        {/*main was used to wrap the children to the style the whole page*/}
+      </body>
     </html>
   );
 }
