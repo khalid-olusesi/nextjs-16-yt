@@ -19,9 +19,21 @@ export const authComponent = createClient<DataModel, typeof schema>(
 
 // Better Auth Options
 export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
+  // Use NEXT_PUBLIC_SITE_URL for production, fallback to SITE_URL or localhost
+  const baseURL =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.SITE_URL ||
+    "http://localhost:3000";
+
+  if (!baseURL) {
+    console.warn(
+      "SITE_URL or NEXT_PUBLIC_SITE_URL not set, defaulting to http://localhost:3000",
+    );
+  }
+
   return {
     appName: "My App",
-    baseURL: process.env.SITE_URL,
+    baseURL: baseURL,
     secret: process.env.BETTER_AUTH_SECRET,
     database: authComponent.adapter(ctx),
     emailAndPassword: {

@@ -1,7 +1,11 @@
 import { convexClient } from "@convex-dev/better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
+// Use NEXT_PUBLIC_SITE_URL for production, fallback to localhost for development
+const baseURL =
+  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  baseURL: baseURL,
   plugins: [convexClient()],
 });

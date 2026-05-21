@@ -42,19 +42,38 @@ export default function LoginPage() {
 
   function onSubmit(data: z.infer<typeof loginSchema>) {
     startTransition(async () => {
-      await authClient.signIn.email({
-        email: data.email,
-        password: data.password,
-        fetchOptions: {
-          onSuccess: () => {
-            toast.success("Logged in succesfully");
-            router.push("/"); // router.push here lets us navigate to the index page after logging
+      try {
+        const response = await authClient.signIn.email({
+          email: data.email,
+          password: data.password,
+          fetchOptions: {
+            onSuccess: () => {
+              toast.success("Logged in succesfully");
+              // Add a small delay to ensure session is established before redirect
+              setTimeout(() => {
+                router.push("/");
+              }, 500);
+            },
+            onError: (error) => {
+              console.error("Login error:", error);
+              toast.error(
+                error?.error?.message || "Failed to login. Please try again.",
+              );
+            },
           },
-          onError: (error) => {
-            toast.error(error.error.message);
-          },
-        },
-      });
+        });
+
+        if (!response) {
+          toast.error("Login failed. Please try again.");
+        }
+      } catch (error) {
+        console.error("Unexpected login error:", error);
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
+        );
+      }
     });
   }
 
