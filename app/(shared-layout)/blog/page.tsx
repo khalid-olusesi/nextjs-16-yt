@@ -4,20 +4,9 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Metadata } from "next";
-import { cacheLife, cacheTag } from "next/cache";
 
-// export const dynamic = "force-static";
-// export const revalidate = 30; //60  means 60seconds
-
-export const metadata: Metadata = {
-  title: "Blog | Next.js 16 Tutorial",
-  description: "Read our latest article and insights",
-  category: "webdevelopment",
-  authors: [{ name: "Olusesi Khalid" }],
-};
+export const dynamic = "force-dynamic";
 
 export default function BlogPage() {
   return (
@@ -39,15 +28,28 @@ export default function BlogPage() {
 }
 
 async function LoadBlogList() {
-  "use cache";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let data: any[] = [];
+  try {
+    data = await fetchQuery(api.post.getPosts); // render it on the server side
+  } catch (error) {
+    console.error("Failed to fetch posts:", error);
+    // Return empty state gracefully during build or when Convex is unavailable
+  }
 
-  cacheLife("hours");
-  cacheTag("blog");
-  const data = await fetchQuery(api.post.getPosts); // render it on the server side
+  if (!data || data.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground text-lg">
+          No blog posts available yet.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {data?.map((post) => (
+      {data.map((post) => (
         <Card className="pt-0 " key={post._id}>
           <div className="relative h-48 w-full overflow-hidden">
             <Image
